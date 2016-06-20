@@ -85,7 +85,7 @@ case class YamlDocument(datum: Object) {
     mapping.flatMap(fld => fld.get(field).map(obj => YamlDocument(obj)))
   }
 
-  def getSequence(ix: Int): Option[YamlDocument] = {
+  def sequence(ix: Int): Option[YamlDocument] = {
     sequence.map(fld => YamlDocument(fld(ix)))
   }
 
