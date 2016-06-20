@@ -51,7 +51,7 @@ val qty: Option[Int] = for {
      prod <- doc.getMapping("product")
      skuk0 <- prod.getSequence(0)
      qty <- skuk0.getMapping("quantity")
-     qtyi <- qty.getInt
+     qtyi <- qty.get[Int]
    } yield {
      qtyi
    }
