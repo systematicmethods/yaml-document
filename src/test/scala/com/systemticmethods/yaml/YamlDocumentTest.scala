@@ -45,10 +45,10 @@ class YamlDocumentTest extends UnitTest {
       case Left(error) => fail(error)
       case Right(adoc) =>
         assert(adoc.isMapping)
-        adoc.getMapping("hr").map(_ == 65)
-        adoc.getMapping("avg").map(_ == 0.278)
-        adoc.getMapping("rbi").map(_ == 147)
-        adoc.getMapping("name").map(_ == "Ken Griffey")
+        adoc.mapping("hr").map(_ == 65)
+        adoc.mapping("avg").map(_ == 0.278)
+        adoc.mapping("rbi").map(_ == 147)
+        adoc.mapping("name").map(_ == "Ken Griffey")
     }
   }
 
@@ -82,7 +82,7 @@ class YamlDocumentTest extends UnitTest {
       case Left(error) => fail(error)
       case Right(adoc) =>
         assert(adoc.isMapping)
-        val americanopt = adoc.getMapping("american")
+        val americanopt = adoc.mapping("american")
         //println(s"americanopt ${americanopt} Seq ${americanopt.get.datum.getClass.getName}")
         assert(americanopt.isDefined)
         assert(americanopt.get.isSequence)
@@ -90,7 +90,7 @@ class YamlDocumentTest extends UnitTest {
         val DetroitTigers = americanopt.flatMap(opt => opt.sequence(1))
         assert(DetroitTigers.isDefined)
         assert(DetroitTigers.get.datum == "Detroit Tigers")
-        val nationalopt = adoc.getMapping("national")
+        val nationalopt = adoc.mapping("national")
         assert(nationalopt.isDefined)
         assert(nationalopt.get.isSequence)
         assert(nationalopt.get.sequence.get.length == 3)
@@ -421,7 +421,7 @@ class YamlDocumentTest extends UnitTest {
       case Left(error) => fail(error)
       case Right(adoc) =>
         assert(adoc.isMapping)
-        val product: Option[YamlDocument] = adoc.getMapping("product")
+        val product: Option[YamlDocument] = adoc.mapping("product")
         //println(s"product $product")
         //println(s"product ${product.get.datum.getClass.getName}")
         assert(product.isDefined)
@@ -432,18 +432,18 @@ class YamlDocumentTest extends UnitTest {
         val sku = product.get.sequence(0)
         assert(sku.isDefined)
         assert(sku.get.isMapping)
-        assert(sku.get.getMapping("sku").get.isScalar)
-        assert(sku.get.getMapping("sku").get.datum == "BL394D")
-        assert(sku.get.getMapping("quantity").get.isScalar)
-        assert(sku.get.getMapping("quantity").get.get[Int].get == 4)
+        assert(sku.get.mapping("sku").get.isScalar)
+        assert(sku.get.mapping("sku").get.datum == "BL394D")
+        assert(sku.get.mapping("quantity").get.isScalar)
+        assert(sku.get.mapping("quantity").get.get[Int].get == 4)
         // either
-        val quantity: Int = adoc.getMapping("product").flatMap(prod => prod.sequence(0).flatMap(sku0 => sku0.getMapping("quantity").flatMap(qty => qty.get[Int]))).get
+        val quantity: Int = adoc.mapping("product").flatMap(prod => prod.sequence(0).flatMap(sku0 => sku0.mapping("quantity").flatMap(qty => qty.get[Int]))).get
         assert(quantity == 4)
         // or
         val qty: Option[Int] = for {
-          prod <- adoc.getMapping("product")
+          prod <- adoc.mapping("product")
           skuk0 <- prod.sequence(0)
-          qty <- skuk0.getMapping("quantity")
+          qty <- skuk0.mapping("quantity")
           qtyi <- qty.get[Int]
         } yield {
           qtyi

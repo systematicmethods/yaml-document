@@ -81,7 +81,7 @@ case class YamlDocument(datum: Object) {
 
   def isScalar: Boolean = sequence.isEmpty && mapping.isEmpty
 
-  def getMapping(field: String): Option[YamlDocument] = {
+  def mapping(field: String): Option[YamlDocument] = {
     mapping.flatMap(fld => fld.get(field).map(obj => YamlDocument(obj)))
   }
 
@@ -97,36 +97,11 @@ case class YamlDocument(datum: Object) {
     }
   }
 
-//  def getLong: Option[Long] = {
-//    val any: Any = datum
-//    any match {
-//      case value: Int => Option(value)
-//      case value: Long => Option(value)
-//      case any => None
-//    }
-//  }
-//
-//  def getFloat: Option[Float] = {
-//    val any: Any = datum
-//    any match {
-//      case value: Float => Option(value)
-//      case any => None
-//    }
-//  }
-//
 //  def getDouble: Option[Double] = {
 //    val any: Any = datum
 //    any match {
 //      case value: Float => Option(value)
 //      case value: Double => Option(value)
-//      case any => None
-//    }
-//  }
-//
-//  def getString: Option[String] = {
-//    val any: Any = datum
-//    any match {
-//      case value: String => Option(value)
 //      case any => None
 //    }
 //  }
