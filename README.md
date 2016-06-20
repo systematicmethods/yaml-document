@@ -5,6 +5,11 @@ conversion to case classes as the idea is to process Yaml documents
 in a generic manner taking inspration from generic processing using Avro.
 Although in this case there is no embedded schema.
 
+This means
+= Yaml documents that have fields added won't break code
+* unwanted Yaml fields can be ignored
+* Fields can be accessed with iterators
+
 ## Example 1
 
 For example with this Yaml string
@@ -52,7 +57,9 @@ val qty: Option[Int] = for {
    }
 ```
 
-## Example 3
+## Example 3 Iteration
+
+TBC
 
 
 

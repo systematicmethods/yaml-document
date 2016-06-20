@@ -13,27 +13,31 @@ class YamlDocumentTest extends UnitTest {
     assert(doc != null)
     doc match {
       case Left(error) => fail(error)
-      case Right(doc) =>
-        assert(doc.isSequence)
-        doc.sequence.map(arr => assertResult(arr(0)) {
-          "Mark McGwire"
-        })
-        doc.sequence.map(arr => assertResult(arr(1)) {
-          "Sammy Sosa"
-        })
-        doc.sequence.map(arr => assertResult(arr(2)) {
-          "Ken Griffey"
-        })
-        val str = doc.iterator.get.mkString(",")
+      case Right(adoc) =>
+        assert(adoc.isSequence)
+        adoc.sequence match {
+          case Some(arr) => {
+            assertResult(arr(0)) {
+              "Mark McGwire"
+            }
+            assertResult(arr(1)) {
+              "Sammy Sosa"
+            }
+            assertResult(arr(2)) {
+              "Ken Griffey"
+            }
+          }
+          case None => fail("Should not be None")
+        }
+        val str = adoc.iterator.get.mkString(",")
         assert(str == "Mark McGwire,Sammy Sosa,Ken Griffey")
     }
   }
 
   it should "read Example 2.2.  Mapping Scalars to Scalars" in {
-    val yamlstr =
-      """hr:  65    # Home runs
-                |avg: 0.278 # Batting average
-                |rbi: 147   # Runs Batted In""".stripMargin
+    val yamlstr = """hr:  65    # Home runs
+                    |avg: 0.278 # Batting average
+                    |rbi: 147   # Runs Batted In""".stripMargin
     val doc = YamlDocument.parseOne(yamlstr)
     assert(doc != null)
     doc match {
@@ -43,10 +47,22 @@ class YamlDocumentTest extends UnitTest {
         doc.mapping.map(achunk => achunk("hr") == 65)
         doc.mapping.map(achunk => achunk("avg") == 0.278)
         doc.mapping.map(achunk => achunk("rbi") == 147)
-        val str = doc.iterator.get.mkString(",")
+    }
+  }
+
+  it should "read Example 2.2.  Mapping Scalars to Scalars as an iterator" in {
+    val yamlstr = """hr:  65    # Home runs
+                    |avg: 0.278 # Batting average
+                    |rbi: 147   # Runs Batted In""".stripMargin
+    val doc = YamlDocument.parseOne(yamlstr)
+    assert(doc != null)
+    doc match {
+      case Left(error) => fail(error)
+      case Right(adoc) =>
+        assert(adoc.isMapping)
+        val str = adoc.iterator.get.mkString(",")
         assert(str ==
           "hr -> 65,avg -> 0.278,rbi -> 147")
-
     }
   }
 
@@ -63,9 +79,9 @@ class YamlDocumentTest extends UnitTest {
     assert(doc != null)
     doc match {
       case Left(error) => fail(error)
-      case Right(doc) =>
-        assert(doc.isMapping)
-        val americanopt = doc.getMapping("american")
+      case Right(adoc) =>
+        assert(adoc.isMapping)
+        val americanopt = adoc.getMapping("american")
         //println(s"americanopt ${americanopt} Seq ${americanopt.get.datum.getClass.getName}")
         assert(americanopt.isDefined)
         assert(americanopt.get.isSequence)
@@ -73,7 +89,7 @@ class YamlDocumentTest extends UnitTest {
         val DetroitTigers = americanopt.flatMap(opt => opt.getSequence(1))
         assert(DetroitTigers.isDefined)
         assert(DetroitTigers.get.datum == "Detroit Tigers")
-        val nationalopt = doc.getMapping("national")
+        val nationalopt = adoc.getMapping("national")
         assert(nationalopt.isDefined)
         assert(nationalopt.get.isSequence)
         assert(nationalopt.get.sequence.get.length == 3)
@@ -97,8 +113,7 @@ class YamlDocumentTest extends UnitTest {
     assert(doc != null)
     doc match {
       case Left(error) => fail(error)
-      case Right(doc) =>
-        assert(doc.isSequence)
+      case Right(doc) => assert(doc.isSequence)
     }
   }
 
@@ -131,8 +146,7 @@ class YamlDocumentTest extends UnitTest {
     assert(doc != null)
     doc match {
       case Left(error) => fail(error)
-      case Right(doc) =>
-        assert(doc.isSequence)
+      case Right(doc) => assert(doc.isSequence)
     }
   }
 
@@ -146,8 +160,7 @@ class YamlDocumentTest extends UnitTest {
     assert(doc != null)
     doc match {
       case Left(error) => fail(error)
-      case Right(doc) =>
-        assert(doc.isMapping)
+      case Right(doc) => assert(doc.isMapping)
     }
   }
 
@@ -227,8 +240,7 @@ class YamlDocumentTest extends UnitTest {
     assert(doc != null)
     doc match {
       case Left(error) => fail(error)
-      case Right(doc) =>
-        assert(doc.isMapping)
+      case Right(doc) => assert(doc.isMapping)
     }
   }
 
@@ -245,8 +257,7 @@ class YamlDocumentTest extends UnitTest {
     assert(doc != null)
     doc match {
       case Left(error) => fail(error)
-      case Right(doc) =>
-        assert(doc.isMapping)
+      case Right(doc) => assert(doc.isMapping)
     }
   }
 
@@ -264,8 +275,7 @@ class YamlDocumentTest extends UnitTest {
     assert(doc != null)
     doc match {
       case Left(error) => fail(error)
-      case Right(doc) =>
-        assert(doc.isMapping)
+      case Right(doc) => assert(doc.isMapping)
     }
   }
 
@@ -282,12 +292,11 @@ class YamlDocumentTest extends UnitTest {
     assert(doc != null)
     doc match {
       case Left(error) => fail(error)
-      case Right(doc) =>
-        assert(doc.isSequence)
+      case Right(doc) => assert(doc.isSequence)
     }
   }
 
-  it should "fail to read Example 2.13.  In literals, newlines are preserved" in {
+  it should "read Example 2.13.  In literals, newlines are preserved" in {
     val yamlstr = """# ASCII Art
                     ;--- |
                     ;  \//||\/||
@@ -295,13 +304,12 @@ class YamlDocumentTest extends UnitTest {
     val doc = YamlDocument.parseOne(yamlstr)
     assert(doc != null)
     doc match {
-      case Left(error) => false  //fail(error)
-      case Right(doc) => fail("supposed to be unsupported")
-        //assert(doc.isSequence)
+      case Left(error) => fail(error)
+      case Right(doc) => assert(doc.isScalar)
     }
   }
 
-  it should "fail to read Example 2.14.  In the folded scalars, newlines become spaces" in {
+  it should "read Example 2.14.  In the folded scalars, newlines become spaces" in {
     val yamlstr = """--- >
                     |  Mark McGwire's
                     |  year was crippled
@@ -309,13 +317,12 @@ class YamlDocumentTest extends UnitTest {
     val doc = YamlDocument.parseOne(yamlstr)
     assert(doc != null)
     doc match {
-      case Left(error) => false  //fail(error)
-      case Right(doc) => fail("supposed to be unsupported")
-        //assert(doc.isMapping)
+      case Left(error) => fail(error)
+      case Right(doc) => assert(doc.isScalar)
     }
   }
 
-  it should "fail to read Example 2.15.  Folded newlines are preserved for 'more indented' and blank lines" in {
+  it should "read Example 2.15.  Folded newlines are preserved for 'more indented' and blank lines" in {
     val yamlstr = """>
                     | Sammy Sosa completed another
                     | fine season with great stats.
@@ -327,9 +334,8 @@ class YamlDocumentTest extends UnitTest {
     val doc = YamlDocument.parseOne(yamlstr)
     assert(doc != null)
     doc match {
-      case Left(error) => false  //fail(error)
-      case Right(doc) => fail("supposed to be unsupported")
-      //assert(doc.isMapping)
+      case Left(error) => fail(error)
+      case Right(doc) => assert(doc.isScalar)
     }
   }
 
@@ -345,8 +351,7 @@ class YamlDocumentTest extends UnitTest {
     assert(doc != null)
     doc match {
       case Left(error) => fail(error)
-      case Right(doc) =>
-        assert(doc.isMapping)
+      case Right(doc) => assert(doc.isMapping)
     }
   }
 
@@ -362,8 +367,7 @@ class YamlDocumentTest extends UnitTest {
     assert(doc != null)
     doc match {
       case Left(error) => fail(error)
-      case Right(doc) =>
-        assert(doc.isMapping)
+      case Right(doc) => assert(doc.isMapping)
     }
   }
 
@@ -378,8 +382,7 @@ class YamlDocumentTest extends UnitTest {
     assert(doc != null)
     doc match {
       case Left(error) => fail(error)
-      case Right(doc) =>
-        assert(doc.isMapping)
+      case Right(doc) => assert(doc.isMapping)
     }
   }
 
@@ -434,16 +437,16 @@ class YamlDocumentTest extends UnitTest {
         assert(sku.get.getMapping("sku").get.isScalar)
         assert(sku.get.getMapping("sku").get.datum == "BL394D")
         assert(sku.get.getMapping("quantity").get.isScalar)
-        assert(sku.get.getMapping("quantity").get.getInt.get == 4)
+        assert(sku.get.getMapping("quantity").get.get[Int].get == 4)
         // either
-        val quantity: Int = doc.getMapping("product").flatMap(prod => prod.getSequence(0).flatMap(sku0 => sku0.getMapping("quantity").flatMap(qty => qty.getInt))).get
+        val quantity: Int = doc.getMapping("product").flatMap(prod => prod.getSequence(0).flatMap(sku0 => sku0.getMapping("quantity").flatMap(qty => qty.get[Int]))).get
         assert(quantity == 4)
         // or
         val qty: Option[Int] = for {
           prod <- doc.getMapping("product")
           skuk0 <- prod.getSequence(0)
           qty <- skuk0.getMapping("quantity")
-          qtyi <- qty.getInt
+          qtyi <- qty.get[Int]
         } yield {
           qtyi
         }

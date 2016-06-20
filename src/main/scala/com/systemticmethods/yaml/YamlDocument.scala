@@ -22,6 +22,7 @@ object YamlDocument {
         fields match {
           case fields: util.LinkedHashMap[String, Object] => Right(YamlDocument(fields.asScala))
           case fields: util.ArrayList[Object] => Right(YamlDocument(fields.asScala))
+          case field: String => Right(YamlDocument(field))
           case unknown: Any => Left(s"Can't recoginise yaml type ${unknown}")
         }
       case Failure(ex) => {
@@ -88,47 +89,47 @@ case class YamlDocument(datum: Object) {
     sequence.map(fld => YamlDocument(fld(ix)))
   }
 
-  def getInt: Option[Int] = {
+  def get[A]: Option[A] = {
     val any: Any = datum
     any match {
-      case value: Int => Option(value)
+      case value: A => Option(value)
       case any => None
     }
   }
 
-  def getLong: Option[Long] = {
-    val any: Any = datum
-    any match {
-      case value: Int => Option(value)
-      case value: Long => Option(value)
-      case any => None
-    }
-  }
-
-  def getFloat: Option[Float] = {
-    val any: Any = datum
-    any match {
-      case value: Float => Option(value)
-      case any => None
-    }
-  }
-
-  def getDouble: Option[Double] = {
-    val any: Any = datum
-    any match {
-      case value: Float => Option(value)
-      case value: Double => Option(value)
-      case any => None
-    }
-  }
-
-  def getString: Option[String] = {
-    val any: Any = datum
-    any match {
-      case value: String => Option(value)
-      case any => None
-    }
-  }
+//  def getLong: Option[Long] = {
+//    val any: Any = datum
+//    any match {
+//      case value: Int => Option(value)
+//      case value: Long => Option(value)
+//      case any => None
+//    }
+//  }
+//
+//  def getFloat: Option[Float] = {
+//    val any: Any = datum
+//    any match {
+//      case value: Float => Option(value)
+//      case any => None
+//    }
+//  }
+//
+//  def getDouble: Option[Double] = {
+//    val any: Any = datum
+//    any match {
+//      case value: Float => Option(value)
+//      case value: Double => Option(value)
+//      case any => None
+//    }
+//  }
+//
+//  def getString: Option[String] = {
+//    val any: Any = datum
+//    any match {
+//      case value: String => Option(value)
+//      case any => None
+//    }
+//  }
 
 }
 
