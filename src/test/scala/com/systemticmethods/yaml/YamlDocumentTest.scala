@@ -77,15 +77,15 @@ class YamlDocumentTest extends UnitTest {
       case Left(error) => fail(error)
       case Right(adoc) =>
         assert(adoc.isMapping)
-        val americanopt: Option[YamlDocument] = adoc.mappingAt("american")
+        val americanopt: Option[YamlDocument] = adoc.get("american")
         //println(s"americanopt ${americanopt} Seq ${americanopt.get.datum.getClass.getName}")
         assert(americanopt.isDefined)
         assert(americanopt.get.isSequence)
         assert(americanopt.get.sequence.length == 3)
-        val DetroitTigers: Option[YamlDocument] = americanopt.get.sequenceAt(1)
+        val DetroitTigers: Option[YamlDocument] = americanopt.get.lift(1)
         assert(DetroitTigers.isDefined)
         assert(DetroitTigers.get.datum == "Detroit Tigers")
-        val nationalopt: Option[YamlDocument] = adoc.mappingAt("national")
+        val nationalopt: Option[YamlDocument] = adoc.get("national")
         assert(nationalopt.isDefined)
         assert(nationalopt.get.isSequence)
         assert(nationalopt.get.sequence.length == 3)
@@ -416,7 +416,7 @@ class YamlDocumentTest extends UnitTest {
       case Left(error) => fail(error)
       case Right(adoc) =>
         assert(adoc.isMapping)
-        val product: Option[YamlDocument] = adoc.mappingAt("product")
+        val product: Option[YamlDocument] = adoc.get("product")
         //println(s"product $product")
         //println(s"product ${product.get.datum.getClass.getName}")
         assert(product.isDefined)
@@ -424,21 +424,21 @@ class YamlDocumentTest extends UnitTest {
         //product.foreach(obj => println(s"obj $obj"))
         val res = product.map(obj => obj.isSequence)
         assert(res.get)
-        val sku: Option[YamlDocument] = product.get.sequenceAt(0)
+        val sku: Option[YamlDocument] = product.get.lift(0)
         assert(sku.isDefined)
         assert(sku.get.isMapping)
-        assert(sku.get.mappingAt("sku").get.isScalar)
-        assert(sku.get.mappingAt("sku").get.datum == "BL394D")
-        assert(sku.get.mappingAt("quantity").get.isScalar)
-        assert(sku.get.mappingAt("quantity").get.get[Int].get == 4)
+        assert(sku.get.get("sku").get.isScalar)
+        assert(sku.get.get("sku").get.datum == "BL394D")
+        assert(sku.get.get("quantity").get.isScalar)
+        assert(sku.get.get("quantity").get.get[Int].get == 4)
         // either
 //        val quantity: Int = adoc.mappingAt("product").map(prod => prod.sequenceAt(0).map(sku0 => sku0.mappingAt("quantity").map(qty => qty.get[Int]))).get
 //        assert(quantity == 4)
         // or
         val qty: Option[Int] = for {
-          prod <- adoc.mappingAt("product")
-          skuk0 <- prod.sequenceAt(0)
-          qty <- skuk0.mappingAt("quantity")
+          prod <- adoc.get("product")
+          skuk0 <- prod.lift(0)
+          qty <- skuk0.get("quantity")
           qtyi <- qty.get[Int]
         } yield {
           qtyi

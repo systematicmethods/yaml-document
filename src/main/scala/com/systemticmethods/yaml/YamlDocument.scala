@@ -81,11 +81,11 @@ case class YamlDocument(datum: Object) {
 
   def isScalar: Boolean = sequence.isEmpty && mapping.isEmpty
 
-  def mappingAt(field: String): Option[YamlDocument] = {
+  def get(field: String): Option[YamlDocument] = {
     mapping.get(field).map(obj => YamlDocument(obj))
   }
 
-  def sequenceAt(ix: Int): Option[YamlDocument] = {
+  def lift(ix: Int): Option[YamlDocument] = {
     sequence.lift(ix).map(item => YamlDocument(item))
   }
 
