@@ -16,11 +16,8 @@ libraryDependencies ++= Seq(
    // test
   "junit" % "junit" % "4.12" % "test",
   "com.novocode" % "junit-interface" % "0.11" % "test",
-  "org.scalatest" %% "scalatest" % "2.2.6" % "test",
-  "net.jcazevedo" %% "moultingyaml" % "0.2" % "test"
+  "org.scalatest" %% "scalatest" % "2.2.6" % "test"
 )
-
-//"org.scala-lang" % "scala-library" % "2.11.7",
 
 
 
