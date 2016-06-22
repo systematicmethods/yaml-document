@@ -55,16 +55,16 @@ object YamlDocument {
 }
 
 case class YamlDocument(datum: Object) {
-  val mapping: mutable.Map[String, Object] = datum match {
-    case fields: mutable.Map[String, Object] => fields
-    case fields: util.LinkedHashMap[String, Object] => fields.asScala
-    case _ => mutable.Map[String, Object]()
+  private val mappings: Map[String, Object] = datum match {
+    case fields: mutable.Map[String, Object] => fields.toMap
+    case fields: util.LinkedHashMap[String, Object] => fields.asScala.toMap
+    case _ => Map[String, Object]()
   }
 
-  val sequence: mutable.Buffer[Object] = datum match {
-    case fields: mutable.Buffer[Object] => fields
-    case fields: util.ArrayList[Object] => fields.asScala
-    case _ => mutable.Buffer[Object]()
+  private val sequences: List[Object] = datum match {
+    case fields: mutable.Buffer[Object] => fields.toList
+    case fields: util.ArrayList[Object] => fields.asScala.toList
+    case _ => List[Object]()
   }
 
   val iterator: Iterable[Any] = datum match {
@@ -75,18 +75,37 @@ case class YamlDocument(datum: Object) {
     case any => mutable.Buffer[Object](any)
   }
 
-  def isMapping: Boolean = mapping.nonEmpty
+  def size:Int = {
+    datum match {
+      case fields: mutable.Map[String, Object] => fields.size
+      case fields: util.LinkedHashMap[String, Object] => fields.size()
+      case fields: mutable.Buffer[Object] => fields.size
+      case fields: util.ArrayList[Object] => fields.size()
+      case any => 1
+      case null => 0
+    }
+  }
 
-  def isSequence: Boolean = sequence.nonEmpty
+  def isMapping: Boolean = mappings.nonEmpty
 
-  def isScalar: Boolean = sequence.isEmpty && mapping.isEmpty
+  def isSequence: Boolean = sequences.nonEmpty
+
+  def isScalar: Boolean = sequences.isEmpty && mappings.isEmpty
 
   def get(field: String): Option[YamlDocument] = {
-    mapping.get(field).map(obj => YamlDocument(obj))
+    mappings.get(field).map(obj => YamlDocument(obj))
+  }
+
+  def mapping[A](field: String): Option[A] = {
+    get(field).flatMap(a => a.get[A])
+  }
+
+  def sequence[A](ix: Int): Option[A] = {
+    lift(ix).flatMap(a => a.get[A])
   }
 
   def lift(ix: Int): Option[YamlDocument] = {
-    sequence.lift(ix).map(item => YamlDocument(item))
+    sequences.lift(ix).map(item => YamlDocument(item))
   }
 
   def get[A]: Option[A] = {
@@ -99,24 +118,6 @@ case class YamlDocument(datum: Object) {
 
 }
 
-//  def mapping[A](field: String): Option[A] = {
-//    val any: Any = datum
-//    any match {
-//      case value: A => Option(value)
-//      case any => None
-//    }
-//    mapping.flatMap(fld => fld.get(field).map(obj => YamlDocument(obj)))
-//  }
-
-
-//  def getDouble: Option[Double] = {
-//    val any: Any = datum
-//    any match {
-//      case value: Float => Option(value)
-//      case value: Double => Option(value)
-//      case any => None
-//    }
-//  }
 
 
 

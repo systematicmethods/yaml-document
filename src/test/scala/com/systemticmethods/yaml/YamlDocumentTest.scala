@@ -15,13 +15,13 @@ class YamlDocumentTest extends UnitTest {
       case Left(error) => fail(error)
       case Right(adoc) =>
         assert(adoc.isSequence)
-        assertResult(adoc.sequence(0)) {
+        assertResult(adoc.sequence[String](0).get) {
           "Mark McGwire"
         }
-        assertResult(adoc.sequence(1)) {
+        assertResult(adoc.sequence[String](1).get) {
           "Sammy Sosa"
         }
-        assertResult(adoc.sequence(2)) {
+        assertResult(adoc.sequence[String](2).get) {
           "Ken Griffey"
         }
         val str = adoc.iterator.mkString(",")
@@ -40,10 +40,10 @@ class YamlDocumentTest extends UnitTest {
       case Left(error) => fail(error)
       case Right(adoc) =>
         assert(adoc.isMapping)
-        assert(adoc.mapping("hr") == 65)
-        assert(adoc.mapping("avg") == 0.278)
-        assert(adoc.mapping("rbi") == 147)
-        assert(adoc.mapping("name") == "Ken Griffey")
+        assert(adoc.mapping[Int]("hr") == Some(65))
+        assert(adoc.mapping[Double]("avg") == Some(0.278))
+        assert(adoc.mapping[Int]("rbi") == Some(147))
+        assert(adoc.mapping[String]("name") == Some("Ken Griffey"))
     }
   }
 
@@ -81,18 +81,18 @@ class YamlDocumentTest extends UnitTest {
         //println(s"americanopt ${americanopt} Seq ${americanopt.get.datum.getClass.getName}")
         assert(americanopt.isDefined)
         assert(americanopt.get.isSequence)
-        assert(americanopt.get.sequence.length == 3)
+        assert(americanopt.get.size == 3)
         val DetroitTigers: Option[YamlDocument] = americanopt.get.lift(1)
         assert(DetroitTigers.isDefined)
         assert(DetroitTigers.get.datum == "Detroit Tigers")
         val nationalopt: Option[YamlDocument] = adoc.get("national")
         assert(nationalopt.isDefined)
         assert(nationalopt.get.isSequence)
-        assert(nationalopt.get.sequence.length == 3)
+        assert(nationalopt.get.size == 3)
         // get a list of nations
-        val nations = nationalopt.get.sequence.toList
+        val nations = nationalopt.get.iterator
+        //println(s"nations $nations")
         assert(nations == List("New York Mets", "Chicago Cubs", "Atlanta Braves"))
-      //americanopt.map(opt => opt.)
     }
   }
 
@@ -428,9 +428,9 @@ class YamlDocumentTest extends UnitTest {
         assert(sku.isDefined)
         assert(sku.get.isMapping)
         assert(sku.get.get("sku").get.isScalar)
-        assert(sku.get.get("sku").get.datum == "BL394D")
+        assert(sku.get.mapping[String]("sku").get == "BL394D")
         assert(sku.get.get("quantity").get.isScalar)
-        assert(sku.get.get("quantity").get.get[Int].get == 4)
+        assert(sku.get.mapping[Int]("quantity").get == 4)
         // either
 //        val quantity: Int = adoc.mappingAt("product").map(prod => prod.sequenceAt(0).map(sku0 => sku0.mappingAt("quantity").map(qty => qty.get[Int]))).get
 //        assert(quantity == 4)
